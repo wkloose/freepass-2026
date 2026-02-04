@@ -5,7 +5,7 @@ type UserRole string
 const (
 	RoleAdmin   UserRole = "ADMIN"
 	RoleOwner   UserRole = "OWNER"
-	RoleStudent UserRole = "STUDENT"
+	RoleCustomer UserRole = "CUSTOMER"
 )
 
 type OrderStatus string
