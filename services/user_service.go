@@ -2,9 +2,13 @@ package services
 
 import (
 	"errors"
+	"os"
+	"time"
 
 	"github.com/Hisyam/freepass-2026/models"
 	"github.com/Hisyam/freepass-2026/repositories"
+	"github.com/Hisyam/freepass-2026/utils"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -23,7 +27,7 @@ type LoginInput struct {
 
 type UserService interface {
 	Register(input RegisterInput) (*models.User, error)
-	Login(input LoginInput) (*models.User, error)
+	Login(input LoginInput) (string, error)
 }
 
 type userService struct {
@@ -56,16 +60,27 @@ func (s *userService) Register(input RegisterInput) (*models.User, error) {
 	return &newUser, nil
 }
 
-func (s *userService) Login(input LoginInput) (*models.User, error) {
+func (s *userService) Login(input LoginInput) (string, error) {
 	user, err := s.repository.FindByEmail(input.Email)
 	if err != nil {
-		return nil, errors.New("invalid email or password")
+		return "", errors.New("invalid email or password")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password))
 	if err != nil {
-		return nil, errors.New("invalid email or password")
+		return "", errors.New("invalid email or password")
 	}
 
-	return user, nil
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":  user.ID.String(),                      
+		"role": user.Role,                             
+		"exp":  time.Now().Add(time.Hour * time.Duration(utils.GetEnvAsInt("JWT_EXPIRY_HOUR", 12))).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	if err != nil {
+		return "", errors.New("failed to generate token")
+	}
+
+	return tokenString, nil
 }
