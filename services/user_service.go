@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"time"
+	"strings"
 
 	"github.com/Hisyam/freepass-2026/models"
 	"github.com/Hisyam/freepass-2026/repositories"
@@ -14,9 +15,9 @@ import (
 )
 
 type RegisterInput struct {
-	Name     string
-	Email    string
-	Password string
+    Name     string `json:"name" binding:"required,min=3"`
+    Email    string `json:"email" binding:"required,email"`
+    Password string `json:"password" binding:"required,min=8"`
 }
 
 type LoginInput struct {
@@ -53,6 +54,9 @@ func (s *userService) Register(input RegisterInput) (*models.User, error) {
 
 	err = s.repository.Create(&newUser)
 	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key") {
+			return nil, errors.New("email sudah terdaftar")
+		}
 		return nil, err
 	}
 

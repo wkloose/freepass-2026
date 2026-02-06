@@ -20,20 +20,22 @@ func (ctrl *UserController) Register(c *gin.Context) {
 	var input services.RegisterInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	user, err := ctrl.userService.Register(input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if err.Error() == "email sudah terdaftar" {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "User registered successfully",
-		"data":    user,
-	})
+	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
 func (ctrl *UserController) Login(c *gin.Context) {
