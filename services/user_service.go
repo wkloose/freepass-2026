@@ -17,7 +17,6 @@ type RegisterInput struct {
 	Name     string
 	Email    string
 	Password string
-	Role     models.UserRole
 }
 
 type LoginInput struct {
@@ -49,7 +48,7 @@ func (s *userService) Register(input RegisterInput) (*models.User, error) {
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: string(hashedPassword),
-		Role:     input.Role,
+		Role:     "CUSTOMER",
 	}
 
 	err = s.repository.Create(&newUser)
