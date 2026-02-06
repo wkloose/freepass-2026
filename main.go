@@ -29,9 +29,12 @@ func main() {
 	userService := services.NewUserService(userRepo)
 	userController := controllers.NewUserController(userService)
 
+	adminService := services.NewAdminService(userRepo)
+	adminController := controllers.NewAdminController(adminService)
+
 	r := gin.Default()
 
-	routes.SetupRoutes(r, userController)
+	routes.SetupRoutes(r, userController, adminController)
 
 	port := os.Getenv("PORT")
 	if port == "" {

@@ -35,14 +35,6 @@ type UserService interface {
 	Login(input LoginInput) (string, error)
 	GetProfile(id uuid.UUID) (*models.User, error)
 	UpdateProfile(id uuid.UUID, input UpdateProfileInput) (*models.User, error)
-	CreateUserByAdmin(input CreateUserInput) (*models.User, error)
-}
-
-type CreateUserInput struct {
-	Name     string `json:"name" binding:"required,min=3"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=8"`
-	Role     string `json:"role" binding:"required,oneof=ADMIN CANTEEN CUSTOMER"`
 }
 
 type userService struct {

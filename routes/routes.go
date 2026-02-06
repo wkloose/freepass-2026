@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine, userController *controllers.UserController) {
+func SetupRoutes(r *gin.Engine, userController *controllers.UserController, adminController *controllers.AdminController) {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
@@ -29,6 +29,7 @@ func SetupRoutes(r *gin.Engine, userController *controllers.UserController) {
 	admin := r.Group("/admin")
 	admin.Use(middleware.RequireAuth, middleware.RequireRole("ADMIN"))
 	{
-		admin.POST("/users", userController.CreateUser)
+		admin.POST("/users", adminController.CreateUser)
+		admin.PUT("/users/:id", adminController.UpdateUser)
 	}
 }
