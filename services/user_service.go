@@ -35,6 +35,14 @@ type UserService interface {
 	Login(input LoginInput) (string, error)
 	GetProfile(id uuid.UUID) (*models.User, error)
 	UpdateProfile(id uuid.UUID, input UpdateProfileInput) (*models.User, error)
+	CreateUserByAdmin(input CreateUserInput) (*models.User, error)
+}
+
+type CreateUserInput struct {
+	Name     string `json:"name" binding:"required,min=3"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=8"`
+	Role     string `json:"role" binding:"required,oneof=ADMIN CANTEEN CUSTOMER"`
 }
 
 type userService struct {
@@ -117,4 +125,29 @@ func (s *userService) UpdateProfile(id uuid.UUID, input UpdateProfileInput) (*mo
 	}
 
 	return user, nil
+}
+
+func (s *userService) CreateUserByAdmin(input CreateUserInput) (*models.User, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	newUser := models.User{
+		ID:       uuid.New(),
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: string(hashedPassword),
+		Role:     models.UserRole(input.Role),
+	}
+
+	err = s.repository.Create(&newUser)
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key") {
+			return nil, errors.New("email has been used by another user")
+		}
+		return nil, err
+	}
+
+	return &newUser, nil
 }

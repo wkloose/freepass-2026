@@ -117,3 +117,27 @@ func (ctrl *UserController) UpdateProfile(c *gin.Context) {
         "data":    updatedUser,
     })
 }
+
+func (ctrl *UserController) CreateUser(c *gin.Context) {
+	var input services.CreateUserInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := ctrl.userService.CreateUserByAdmin(input)
+	if err != nil {
+		if err.Error() == "email has been used by another user" {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "User created successfully",
+		"data":    user,
+	})
+}
