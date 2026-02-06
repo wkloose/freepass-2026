@@ -25,10 +25,16 @@ type LoginInput struct {
 	Password string
 }
 
+type UpdateProfileInput struct {
+	Name  string `json:"name" binding:"required,min=3"`
+	Email string `json:"email" binding:"required,email"`
+}
+
 type UserService interface {
 	Register(input RegisterInput) (*models.User, error)
 	Login(input LoginInput) (string, error)
 	GetProfile(id uuid.UUID) (*models.User, error)
+	UpdateProfile(id uuid.UUID, input UpdateProfileInput) (*models.User, error)
 }
 
 type userService struct {
@@ -56,7 +62,7 @@ func (s *userService) Register(input RegisterInput) (*models.User, error) {
 	err = s.repository.Create(&newUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key") {
-			return nil, errors.New("email sudah terdaftar")
+			return nil, errors.New("email is registered")
 		}
 		return nil, err
 	}
@@ -91,4 +97,24 @@ func (s *userService) Login(input LoginInput) (string, error) {
 
 func (s *userService) GetProfile(id uuid.UUID) (*models.User, error) {
 	return s.repository.FindByID(id)
+}
+
+func (s *userService) UpdateProfile(id uuid.UUID, input UpdateProfileInput) (*models.User, error) {
+	user, err := s.repository.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Name = input.Name
+	user.Email = input.Email
+
+	err = s.repository.Update(user)
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key") {
+			return nil, errors.New("email has been used by another user")
+		}
+		return nil, err
+	}
+
+	return user, nil
 }
