@@ -4,8 +4,15 @@ type UserRole string
 
 const (
 	RoleAdmin   UserRole = "ADMIN"
-	RoleOwner   UserRole = "OWNER"
+	RoleOwner   UserRole = "CANTEEN"
 	RoleCustomer UserRole = "CUSTOMER"
+)
+
+type PaymentStatus string
+
+const (
+	PaymentStatusUnpaid PaymentStatus = "UNPAID"
+	PaymentStatusPaid   PaymentStatus = "PAID"
 )
 
 type OrderStatus string
