@@ -53,7 +53,7 @@ func (s *adminService) CreateUser(input CreateUserInput) (*models.User, error) {
 	err = s.userRepository.Create(&newUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key") {
-			return nil, errors.New("email sudah terdaftar")
+			return nil, errors.New("email has been used by another user")
 		}
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (s *adminService) CreateUser(input CreateUserInput) (*models.User, error) {
 func (s *adminService) UpdateUser(id uuid.UUID, input UpdateUserByAdminInput) (*models.User, error) {
 	user, err := s.userRepository.FindByID(id)
 	if err != nil {
-		return nil, errors.New("user tidak ditemukan")
+		return nil, errors.New("user not found")
 	}
 
 	user.Name = input.Name
@@ -74,7 +74,7 @@ func (s *adminService) UpdateUser(id uuid.UUID, input UpdateUserByAdminInput) (*
 	err = s.userRepository.Update(user)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key") {
-			return nil, errors.New("email sudah digunakan user lain")
+			return nil, errors.New("email has been used by another user")
 		}
 		return nil, err
 	}

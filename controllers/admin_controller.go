@@ -26,11 +26,11 @@ func (ctrl *AdminController) CreateUser(c *gin.Context) {
 
 	user, err := ctrl.adminService.CreateUser(input)
 	if err != nil {
-		if err.Error() == "email sudah terdaftar" {
+		if err.Error() == "email has been used by another user" {
 			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal membuat user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
 
@@ -56,11 +56,11 @@ func (ctrl *AdminController) UpdateUser(c *gin.Context) {
 
 	updatedUser, err := ctrl.adminService.UpdateUser(userID, input)
 	if err != nil {
-		if err.Error() == "user tidak ditemukan" {
+		if err.Error() == "user not found" {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
-		if err.Error() == "email sudah digunakan user lain" {
+		if err.Error() == "email has been used by another user" {
 			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return
 		}
