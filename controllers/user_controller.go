@@ -27,7 +27,7 @@ func (ctrl *UserController) Register(c *gin.Context) {
 
 	user, err := ctrl.userService.Register(input)
 	if err != nil {
-		if err.Error() == "email sudah terdaftar" {
+		if err.Error() == "email is registered" {
 			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return
 		}
@@ -81,9 +81,39 @@ func (ctrl *UserController) Me(c *gin.Context) {
 
 	user, err := ctrl.userService.GetProfile(currentUser.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengambil data profil"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user profile"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": user})
+}
+
+func (ctrl *UserController) UpdateProfile(c *gin.Context) {
+    userCtx, exists := c.Get("currentUser")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized user"})
+        return
+    }
+    currentUser := userCtx.(models.User)
+
+    var input services.UpdateProfileInput
+    if err := c.ShouldBindJSON(&input); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    updatedUser, err := ctrl.userService.UpdateProfile(currentUser.ID, input)
+    if err != nil {
+        if err.Error() == "email has been used by another user" {
+            c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+            return
+        }
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "message": "Profile updated successfully",
+        "data":    updatedUser,
+    })
 }

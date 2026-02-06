@@ -2,9 +2,8 @@ package routes
 
 import (
 	"github.com/Hisyam/freepass-2026/controllers"
-	"github.com/gin-gonic/gin"
 	"github.com/Hisyam/freepass-2026/middleware"
-
+	"github.com/gin-gonic/gin"
 )
 
 func SetupRoutes(r *gin.Engine, userController *controllers.UserController) {
@@ -17,8 +16,9 @@ func SetupRoutes(r *gin.Engine, userController *controllers.UserController) {
 		})
 	})
 	protected := r.Group("/")
-	protected.Use(middleware.RequireAuth) 
+	protected.Use(middleware.RequireAuth)
 	{
 		protected.GET("/me", userController.Me)
+		protected.PUT("/me", userController.UpdateProfile)
 	}
 }
