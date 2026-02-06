@@ -31,5 +31,6 @@ func SetupRoutes(r *gin.Engine, userController *controllers.UserController, admi
 	{
 		admin.POST("/users", adminController.CreateUser)
 		admin.PUT("/users/:id", adminController.UpdateUser)
+		admin.DELETE("/users/:id", adminController.DeleteUser)
 	}
 }

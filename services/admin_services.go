@@ -26,6 +26,7 @@ type UpdateUserByAdminInput struct {
 type AdminService interface {
 	CreateUser(input CreateUserInput) (*models.User, error)
 	UpdateUser(id uuid.UUID, input UpdateUserByAdminInput) (*models.User, error)
+	DeleteUser(id uuid.UUID) error
 }
 
 type adminService struct {
@@ -80,4 +81,12 @@ func (s *adminService) UpdateUser(id uuid.UUID, input UpdateUserByAdminInput) (*
 	}
 
 	return user, nil
+}
+
+func (s *adminService) DeleteUser(id uuid.UUID) error {
+	_, err := s.userRepository.FindByID(id)
+    if err != nil {
+        return errors.New("user not found")
+    }
+	return s.userRepository.Delete(id)
 }
