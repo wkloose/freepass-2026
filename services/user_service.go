@@ -3,8 +3,8 @@ package services
 import (
 	"errors"
 	"os"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/Hisyam/freepass-2026/models"
 	"github.com/Hisyam/freepass-2026/repositories"
@@ -15,9 +15,9 @@ import (
 )
 
 type RegisterInput struct {
-    Name     string `json:"name" binding:"required,min=3"`
-    Email    string `json:"email" binding:"required,email"`
-    Password string `json:"password" binding:"required,min=8"`
+	Name     string `json:"name" binding:"required,min=3"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=8"`
 }
 
 type LoginInput struct {
@@ -28,6 +28,7 @@ type LoginInput struct {
 type UserService interface {
 	Register(input RegisterInput) (*models.User, error)
 	Login(input LoginInput) (string, error)
+	GetProfile(id uuid.UUID) (*models.User, error)
 }
 
 type userService struct {
@@ -75,8 +76,8 @@ func (s *userService) Login(input LoginInput) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":  user.ID.String(),                      
-		"role": user.Role,                             
+		"sub":  user.ID.String(),
+		"role": user.Role,
 		"exp":  time.Now().Add(time.Hour * time.Duration(utils.GetEnvAsInt("JWT_EXPIRY_HOUR", 12))).Unix(),
 	})
 
@@ -86,4 +87,8 @@ func (s *userService) Login(input LoginInput) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func (s *userService) GetProfile(id uuid.UUID) (*models.User, error) {
+	return s.repository.FindByID(id)
 }

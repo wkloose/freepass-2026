@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/Hisyam/freepass-2026/models"
 	"github.com/Hisyam/freepass-2026/services"
 	"github.com/Hisyam/freepass-2026/utils"
 	"github.com/gin-gonic/gin"
@@ -67,4 +68,22 @@ func (ctrl *UserController) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 	})
+}
+
+func (ctrl *UserController) Me(c *gin.Context) {
+	userCtx, exists := c.Get("currentUser")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized user"})
+		return
+	}
+
+	currentUser := userCtx.(models.User)
+
+	user, err := ctrl.userService.GetProfile(currentUser.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengambil data profil"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": user})
 }

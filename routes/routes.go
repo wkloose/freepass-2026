@@ -3,6 +3,8 @@ package routes
 import (
 	"github.com/Hisyam/freepass-2026/controllers"
 	"github.com/gin-gonic/gin"
+	"github.com/Hisyam/freepass-2026/middleware"
+
 )
 
 func SetupRoutes(r *gin.Engine, userController *controllers.UserController) {
@@ -14,4 +16,9 @@ func SetupRoutes(r *gin.Engine, userController *controllers.UserController) {
 			"message": "pong",
 		})
 	})
+	protected := r.Group("/")
+	protected.Use(middleware.RequireAuth) 
+	{
+		protected.GET("/me", userController.Me)
+	}
 }
